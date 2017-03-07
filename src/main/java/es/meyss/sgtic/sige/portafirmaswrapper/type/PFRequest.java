@@ -1,4 +1,4 @@
-package es.meyss.sgtic.sige.portafirmaswrapper.wrapper;
+package es.meyss.sgtic.sige.portafirmaswrapper.type;
 
 import es.meyss.sgtic.sige.portafirmas.client.ws.type.Request;
 

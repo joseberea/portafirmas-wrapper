@@ -29,11 +29,14 @@ import es.meyss.sgtic.sige.portafirmas.client.ws.type.SignLineType;
 import es.meyss.sgtic.sige.portafirmas.client.ws.type.SignType;
 import es.meyss.sgtic.sige.portafirmas.client.ws.type.Signer;
 import es.meyss.sgtic.sige.portafirmas.client.ws.type.User;
-import es.meyss.sgtic.sige.portafirmaswrapper.constant.PFImportanceLevel;
+import es.meyss.sgtic.sige.portafirmaswrapper.exception.MandatoryEmptyFieldException;
+import es.meyss.sgtic.sige.portafirmaswrapper.exception.NullRequestException;
+import es.meyss.sgtic.sige.portafirmaswrapper.exception.WrapperConfigException;
+import es.meyss.sgtic.sige.portafirmaswrapper.type.PFDocument;
+import es.meyss.sgtic.sige.portafirmaswrapper.type.PFImportanceLevel;
+import es.meyss.sgtic.sige.portafirmaswrapper.type.PFRequest;
+import es.meyss.sgtic.sige.portafirmaswrapper.type.PFResponse;
 import es.meyss.sgtic.sige.portafirmaswrapper.wrapper.IPortafirmasWrapper;
-import es.meyss.sgtic.sige.portafirmaswrapper.wrapper.PFDocument;
-import es.meyss.sgtic.sige.portafirmaswrapper.wrapper.PFRequest;
-import es.meyss.sgtic.sige.portafirmaswrapper.wrapper.PFResponse;
 
 public class PortaFirmasWrapperImpl implements IPortafirmasWrapper {
 
@@ -56,7 +59,13 @@ public class PortaFirmasWrapperImpl implements IPortafirmasWrapper {
 	private Map<Integer, LinkedList<Signer>> signerMap = new LinkedHashMap<Integer, LinkedList<Signer>>();
 	private List<Document> documentList = new LinkedList<Document>();
 
-	public PortaFirmasWrapperImpl(Authentication authentication, String application) throws ServiceException {
+	public PortaFirmasWrapperImpl(Authentication authentication, String application) throws WrapperConfigException, ServiceException {
+		if(authentication == null) {
+			throw new WrapperConfigException("authentication");
+		}
+		if(application == null) {
+			throw new WrapperConfigException("application");
+		}
 		ModifyService_ServiceLocator serviceLocatorModify = new ModifyService_ServiceLocator();
 		wsModifyService = serviceLocatorModify.getModifyServicePort();
 		QueryService_ServiceLocator serviceLocatorQuery = new QueryService_ServiceLocator();
@@ -68,7 +77,7 @@ public class PortaFirmasWrapperImpl implements IPortafirmasWrapper {
 	}
 
 	@Override
-	public void createRequest() throws ExceptionInfo, RemoteException {
+	public void createRequest() {
 		request = new Request();
 		request.setSubject(" -- No subject -- ");
 		request.setFentry(calendar);
@@ -81,7 +90,13 @@ public class PortaFirmasWrapperImpl implements IPortafirmasWrapper {
 	}
 
 	@Override
-	public void createRequest(final String subject, final ImportanceLevel importanceLevel, SignType signType) throws ExceptionInfo, RemoteException {
+	public void createRequest(final String subject, final ImportanceLevel importanceLevel, SignType signType) throws MandatoryEmptyFieldException {
+		if(importanceLevel == null) {
+			throw new MandatoryEmptyFieldException("ImportanceLevel");
+		}
+		if(signType == null) {
+			throw new MandatoryEmptyFieldException("SignType");
+		}
 		request = new Request();
 		request.setSubject(subject);
 		request.setFentry(calendar);
@@ -93,34 +108,6 @@ public class PortaFirmasWrapperImpl implements IPortafirmasWrapper {
 		request.setRemitterList(new User[0]);
 	}
 	
-	/*private SignLine[] getSignLineList() {
-		List<SignLine> signLineList = new ArrayList<SignLine>();
-		signLineList.add(getSignLine1());
-		return signLineList.toArray(new SignLine[signLineList.size()]);
-	}
-
-	
-	private SignLine getSignLine1() {
-		SignLine signLine = new SignLine();
-		signLine.setSignerList(getSignerList1());
-		signLine.setType(SignLineType.FIRMA);
-		return signLine;
-	}
-
-	private Signer[] getSignerList1() {
-		List<Signer> signerList = new ArrayList<Signer>();
-		signerList.add(getSigner1());
-		return signerList.toArray(new Signer[signerList.size()]);
-	}
-
-	private Signer getSigner1() {
-		Signer signer = new Signer();
-		User user1 = new User();  
-		user1.setIdentifier("48970544W");
-		signer.setUserJob(user1);
-		return signer;
-	}*/
-
 	@Override
 	public void setRequestSubject(final String subject) {
 		request.setSubject(subject);
@@ -149,17 +136,46 @@ public class PortaFirmasWrapperImpl implements IPortafirmasWrapper {
 
 	@Override
 	public void deleteRequest(final String requestId) throws ExceptionInfo, RemoteException {
-		wsModifyService.removeRequest(authentication, new StringHolder(requestId), "  -- Nothing -- ");
+		if(request != null && request.getIdentifier().equals(requestId)) {
+			// Se elimina la request temporal
+			clearRequest();
+		} else {
+			// Se elimina otra request
+			wsModifyService.removeRequest(authentication, new StringHolder(requestId), "  -- Nothing -- ");
+		}
 	}
 
 	@Override
-	public String sendRequest() throws ExceptionInfo, RemoteException {
+	public String sendRequest() throws ExceptionInfo, RemoteException, MandatoryEmptyFieldException, NullRequestException {
 		String requestId;
 		Signer[] signerArray;
 		SignLine[] signLineArray;
 		Document[] documentArray;
+		
+		if(request == null) {
+			throw new NullRequestException();
+		}
+		
+		if(request.getImportanceLevel() == null) {
+			throw new MandatoryEmptyFieldException("ImportanceLevel");
+		}
+		if(request.getSignType() == null) {
+			throw new MandatoryEmptyFieldException("SignType");
+		}
+		
+		if(documentList.size() == 0) {
+			throw new MandatoryEmptyFieldException("Document");
+		}
+		
+		if(signLineMap.values().size() == 0) {
+			throw new MandatoryEmptyFieldException("SignLine");
+		}
+		
 		// Singer
 		for (Entry<Integer, LinkedList<Signer>> entry : signerMap.entrySet()) {
+			if(entry.getValue().size() == 0) {
+				throw new MandatoryEmptyFieldException("Signer", "SignLine", entry.getKey());
+			}
 			signerArray = new Signer[entry.getValue().size()];
 			signerArray = entry.getValue().toArray(signerArray);
 			signLineMap.get(entry.getKey()).setSignerList(signerArray);

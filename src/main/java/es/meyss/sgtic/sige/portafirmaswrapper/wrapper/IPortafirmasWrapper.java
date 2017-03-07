@@ -7,14 +7,15 @@ import es.meyss.sgtic.sige.portafirmas.client.ws.type.ExceptionInfo;
 import es.meyss.sgtic.sige.portafirmas.client.ws.type.ImportanceLevel;
 import es.meyss.sgtic.sige.portafirmas.client.ws.type.SignLineType;
 import es.meyss.sgtic.sige.portafirmas.client.ws.type.SignType;
+import es.meyss.sgtic.sige.portafirmaswrapper.exception.MandatoryEmptyFieldException;
+import es.meyss.sgtic.sige.portafirmaswrapper.exception.NullRequestException;
+import es.meyss.sgtic.sige.portafirmaswrapper.type.PFResponse;
 
 public interface IPortafirmasWrapper {
-	/**
-	 * Crear request
-	 */
-	public void createRequest() throws ExceptionInfo, RemoteException;
 
-	public void createRequest(final String subject, final ImportanceLevel importanceLevel, SignType signType) throws ExceptionInfo, RemoteException;
+	public void createRequest();
+
+	public void createRequest(final String subject, final ImportanceLevel importanceLevel, SignType signType) throws MandatoryEmptyFieldException;
 
 	public void setRequestSubject(final String subject);
 
@@ -26,7 +27,7 @@ public interface IPortafirmasWrapper {
 
 	public void deleteRequest(final String requestId) throws ExceptionInfo, RemoteException;
 
-	public String sendRequest() throws ExceptionInfo, RemoteException;
+	public String sendRequest() throws ExceptionInfo, RemoteException, MandatoryEmptyFieldException, NullRequestException;
 
 	public void addSignLine(final Integer signLine);
 

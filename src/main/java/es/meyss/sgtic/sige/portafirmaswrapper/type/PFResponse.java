@@ -1,4 +1,4 @@
-package es.meyss.sgtic.sige.portafirmaswrapper.wrapper;
+package es.meyss.sgtic.sige.portafirmaswrapper.type;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
