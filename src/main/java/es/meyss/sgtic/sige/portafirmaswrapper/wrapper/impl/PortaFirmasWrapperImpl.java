@@ -27,15 +27,18 @@ import es.meyss.sgtic.sige.portafirmas.client.ws.type.Request;
 import es.meyss.sgtic.sige.portafirmas.client.ws.type.SignLine;
 import es.meyss.sgtic.sige.portafirmas.client.ws.type.SignLineType;
 import es.meyss.sgtic.sige.portafirmas.client.ws.type.SignType;
+import es.meyss.sgtic.sige.portafirmas.client.ws.type.Signature;
 import es.meyss.sgtic.sige.portafirmas.client.ws.type.Signer;
 import es.meyss.sgtic.sige.portafirmas.client.ws.type.User;
 import es.meyss.sgtic.sige.portafirmaswrapper.exception.MandatoryEmptyFieldException;
 import es.meyss.sgtic.sige.portafirmaswrapper.exception.NullRequestException;
 import es.meyss.sgtic.sige.portafirmaswrapper.exception.WrapperConfigException;
 import es.meyss.sgtic.sige.portafirmaswrapper.type.PFDocument;
+import es.meyss.sgtic.sige.portafirmaswrapper.type.PFDocumentStatus;
 import es.meyss.sgtic.sige.portafirmaswrapper.type.PFImportanceLevel;
 import es.meyss.sgtic.sige.portafirmaswrapper.type.PFRequest;
 import es.meyss.sgtic.sige.portafirmaswrapper.type.PFResponse;
+import es.meyss.sgtic.sige.portafirmaswrapper.type.PFStatusType;
 import es.meyss.sgtic.sige.portafirmaswrapper.wrapper.IPortafirmasWrapper;
 
 public class PortaFirmasWrapperImpl implements IPortafirmasWrapper {
@@ -132,6 +135,22 @@ public class PortaFirmasWrapperImpl implements IPortafirmasWrapper {
 			response.getDocuments().put(document.getIdentifier(), new PFDocument(document));
 		}
 		return response;
+	}
+	
+	@Override
+	public PFDocumentStatus getDocumentStatus(String documentId, String requestId) throws ExceptionInfo, RemoteException {
+		PFDocumentStatus status = new PFDocumentStatus();
+		
+		Request request = wsQueryService.queryRequest(authentication, requestId);
+		if(request.getRequestStatus().equals(PFStatusType.ACEPTADO)) {
+			// Documento firmado, actualizamos el valor del content
+			Signature sign = wsQueryService.downloadSign(authentication, documentId);
+			status.setContent(sign.getContent());
+		} else {
+			status.setContent(wsQueryService.downloadDocument(authentication, documentId));
+		}
+		status.setStatus(new PFStatusType(request.getRequestStatus().getValue()));
+		return status;
 	}
 
 	@Override

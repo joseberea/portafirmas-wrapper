@@ -9,6 +9,7 @@ import es.meyss.sgtic.sige.portafirmas.client.ws.type.SignLineType;
 import es.meyss.sgtic.sige.portafirmas.client.ws.type.SignType;
 import es.meyss.sgtic.sige.portafirmaswrapper.exception.MandatoryEmptyFieldException;
 import es.meyss.sgtic.sige.portafirmaswrapper.exception.NullRequestException;
+import es.meyss.sgtic.sige.portafirmaswrapper.type.PFDocumentStatus;
 import es.meyss.sgtic.sige.portafirmaswrapper.type.PFResponse;
 
 public interface IPortafirmasWrapper {
@@ -24,6 +25,8 @@ public interface IPortafirmasWrapper {
 	public void setRequestSignType(final SignType signType);
 	
 	public PFResponse getRequest(String requestId) throws ExceptionInfo, RemoteException;
+	
+	public PFDocumentStatus getDocumentStatus(String documentId, String requestId) throws ExceptionInfo, RemoteException;
 
 	public void deleteRequest(final String requestId) throws ExceptionInfo, RemoteException;
 
