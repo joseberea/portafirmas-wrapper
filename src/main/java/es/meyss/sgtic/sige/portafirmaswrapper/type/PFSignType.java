@@ -1,6 +1,6 @@
 package es.meyss.sgtic.sige.portafirmaswrapper.type;
 
-import es.meyss.sgtic.sige.portafirmas.client.ws.type.SignType;
+import es.meyss.sgtic.sige.portafirmas.type.SignType;
 
 public final class PFSignType {
     public static final SignType CASCADA = SignType.value1;

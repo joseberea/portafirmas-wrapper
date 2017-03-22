@@ -2,11 +2,11 @@ package es.meyss.sgtic.sige.portafirmaswrapper.wrapper;
 
 import java.rmi.RemoteException;
 
-import es.meyss.sgtic.sige.portafirmas.client.ws.type.DocumentType;
-import es.meyss.sgtic.sige.portafirmas.client.ws.type.ExceptionInfo;
-import es.meyss.sgtic.sige.portafirmas.client.ws.type.ImportanceLevel;
-import es.meyss.sgtic.sige.portafirmas.client.ws.type.SignLineType;
-import es.meyss.sgtic.sige.portafirmas.client.ws.type.SignType;
+import es.meyss.sgtic.sige.portafirmas.type.DocumentType;
+import es.meyss.sgtic.sige.portafirmas.type.ExceptionInfo;
+import es.meyss.sgtic.sige.portafirmas.type.ImportanceLevel;
+import es.meyss.sgtic.sige.portafirmas.type.SignLineType;
+import es.meyss.sgtic.sige.portafirmas.type.SignType;
 import es.meyss.sgtic.sige.portafirmaswrapper.exception.MandatoryEmptyFieldException;
 import es.meyss.sgtic.sige.portafirmaswrapper.exception.NullRequestException;
 import es.meyss.sgtic.sige.portafirmaswrapper.type.PFDocumentStatus;

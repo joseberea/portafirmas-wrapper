@@ -3,7 +3,7 @@ package es.meyss.sgtic.sige.portafirmaswrapper.type;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import es.meyss.sgtic.sige.portafirmas.client.ws.type.Request;
+import es.meyss.sgtic.sige.portafirmas.type.Request;
 
 public class PFResponse {
 

@@ -1,6 +1,6 @@
 package es.meyss.sgtic.sige.portafirmaswrapper.type;
 
-import es.meyss.sgtic.sige.portafirmas.client.ws.type.RequestStatus;
+import es.meyss.sgtic.sige.portafirmas.type.RequestStatus;
 
 public final class PFStatusType {
 	public static final RequestStatus ACEPTADO = RequestStatus.value1;

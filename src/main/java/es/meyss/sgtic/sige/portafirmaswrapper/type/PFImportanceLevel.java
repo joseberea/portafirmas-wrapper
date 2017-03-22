@@ -1,6 +1,6 @@
 package es.meyss.sgtic.sige.portafirmaswrapper.type;
 
-import es.meyss.sgtic.sige.portafirmas.client.ws.type.ImportanceLevel;
+import es.meyss.sgtic.sige.portafirmas.type.ImportanceLevel;
 
 public final class PFImportanceLevel {
 	public static final ImportanceLevel NORMAL = new ImportanceLevel("1", "");

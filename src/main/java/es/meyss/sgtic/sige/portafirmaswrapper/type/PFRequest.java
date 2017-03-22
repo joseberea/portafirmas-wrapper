@@ -1,6 +1,6 @@
 package es.meyss.sgtic.sige.portafirmaswrapper.type;
 
-import es.meyss.sgtic.sige.portafirmas.client.ws.type.Request;
+import es.meyss.sgtic.sige.portafirmas.type.Request;
 
 public class PFRequest extends Request {
 

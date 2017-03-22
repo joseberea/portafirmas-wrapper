@@ -1,6 +1,6 @@
 package es.meyss.sgtic.sige.portafirmaswrapper.type;
 
-import es.meyss.sgtic.sige.portafirmas.client.ws.type.SignLineType;
+import es.meyss.sgtic.sige.portafirmas.type.SignLineType;
 
 public final class PFSignLineType {
     public static final SignLineType FIRMA = SignLineType.FIRMA;
