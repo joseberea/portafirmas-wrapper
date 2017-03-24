@@ -43,4 +43,6 @@ public interface IPortafirmasWrapper {
 	public void addDocument(final byte[] content, final String mimeType, final String name, final DocumentType documentType) throws ExceptionInfo, RemoteException ;
 	
 	public void deleteDocument(final String documentId, final String requestId) throws ExceptionInfo, RemoteException ;
+	
+	public boolean existUser(final String userId);
 }

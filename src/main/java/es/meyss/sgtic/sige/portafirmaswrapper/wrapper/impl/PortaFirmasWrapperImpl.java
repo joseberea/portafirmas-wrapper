@@ -265,6 +265,16 @@ public class PortaFirmasWrapperImpl implements IPortafirmasWrapper {
 			}
 		}
 	}
+	
+	@Override
+	public boolean existUser(final String userId) {
+		try {
+			wsQueryService.queryUsers(authentication, userId);
+		} catch (Exception e) {
+			return false;
+		}
+		return true;
+	}
 
 	
 	private void clearRequest() {
