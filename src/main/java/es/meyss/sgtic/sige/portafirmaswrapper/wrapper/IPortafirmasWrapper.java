@@ -1,5 +1,6 @@
 package es.meyss.sgtic.sige.portafirmaswrapper.wrapper;
 
+import java.io.IOException;
 import java.rmi.RemoteException;
 
 import es.meyss.sgtic.sige.portafirmas.type.DocumentType;
@@ -26,7 +27,7 @@ public interface IPortafirmasWrapper {
 	
 	public PFResponse getRequest(String requestId) throws ExceptionInfo, RemoteException;
 	
-	public PFDocumentStatus getDocumentStatus(String documentId, String requestId) throws ExceptionInfo, RemoteException;
+	public PFDocumentStatus getDocumentStatus(String documentId, String requestId) throws ExceptionInfo, RemoteException, IOException;
 
 	public void deleteRequest(final String requestId) throws ExceptionInfo, RemoteException;
 

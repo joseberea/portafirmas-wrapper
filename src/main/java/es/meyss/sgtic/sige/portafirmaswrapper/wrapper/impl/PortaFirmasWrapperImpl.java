@@ -1,5 +1,7 @@
 package es.meyss.sgtic.sige.portafirmaswrapper.wrapper.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.rmi.RemoteException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -11,6 +13,9 @@ import java.util.Map.Entry;
 
 import javax.xml.rpc.ServiceException;
 import javax.xml.rpc.holders.StringHolder;
+
+import org.apache.axis.AxisProperties;
+import org.apache.commons.io.IOUtils;
 
 import es.meyss.sgtic.sige.portafirmas.client.ws.admin.AdminService_PortType;
 import es.meyss.sgtic.sige.portafirmas.client.ws.admin.AdminService_ServiceLocator;
@@ -27,9 +32,9 @@ import es.meyss.sgtic.sige.portafirmas.type.Request;
 import es.meyss.sgtic.sige.portafirmas.type.SignLine;
 import es.meyss.sgtic.sige.portafirmas.type.SignLineType;
 import es.meyss.sgtic.sige.portafirmas.type.SignType;
-import es.meyss.sgtic.sige.portafirmas.type.Signature;
 import es.meyss.sgtic.sige.portafirmas.type.Signer;
 import es.meyss.sgtic.sige.portafirmas.type.User;
+import es.meyss.sgtic.sige.portafirmaswrapper.XOPHandler;
 import es.meyss.sgtic.sige.portafirmaswrapper.exception.MandatoryEmptyFieldException;
 import es.meyss.sgtic.sige.portafirmaswrapper.exception.NullRequestException;
 import es.meyss.sgtic.sige.portafirmaswrapper.exception.WrapperConfigException;
@@ -63,6 +68,7 @@ public class PortaFirmasWrapperImpl implements IPortafirmasWrapper {
 	private List<Document> documentList = new LinkedList<Document>();
 
 	public PortaFirmasWrapperImpl(Authentication authentication, String application) throws WrapperConfigException, ServiceException {
+		AxisProperties.setProperty("axis.ClientConfigFile", "src/main/java/es/meyss/sgtic/sige/portafirmaswrapper/client-config.wsdd");
 		if(authentication == null) {
 			throw new WrapperConfigException("authentication");
 		}
@@ -138,21 +144,20 @@ public class PortaFirmasWrapperImpl implements IPortafirmasWrapper {
 	}
 	
 	@Override
-	public PFDocumentStatus getDocumentStatus(String documentId, String requestId) throws ExceptionInfo, RemoteException {
+	public PFDocumentStatus getDocumentStatus(String documentId, String requestId) throws ExceptionInfo, RemoteException, IOException {
 		PFDocumentStatus status = new PFDocumentStatus();
 		
 		Request request = wsQueryService.queryRequest(authentication, requestId);
 		if(request.getRequestStatus().equals(PFStatusType.ACEPTADO)) {
 			// Documento firmado, actualizamos el valor del content
-			Signature sign = wsQueryService.downloadSign(authentication, documentId);
-			status.setContent(sign.getContent());
+			status.setContent(getSign(documentId));
 		} else {
-			status.setContent(wsQueryService.downloadDocument(authentication, documentId));
+			status.setContent(getDocument(documentId));
 		}
 		status.setStatus(new PFStatusType(request.getRequestStatus().getValue()));
 		return status;
 	}
-
+	
 	@Override
 	public void deleteRequest(final String requestId) throws ExceptionInfo, RemoteException {
 		if(request != null && request.getIdentifier().equals(requestId)) {
@@ -282,5 +287,18 @@ public class PortaFirmasWrapperImpl implements IPortafirmasWrapper {
 		signLineMap = new LinkedHashMap<Integer, SignLine>();
 		signerMap = new LinkedHashMap<Integer, LinkedList<Signer>>();
 		documentList = new LinkedList<Document>();
+	}
+	
+	public byte[] getDocument(String documentId) throws IOException {
+		wsQueryService.downloadDocument(authentication, documentId);
+		InputStream is = XOPHandler.getDocumentStream();
+		return IOUtils.toByteArray(is);
+		
+	}
+	
+	private byte[] getSign(String documentId) throws IOException {
+		wsQueryService.downloadSign(authentication, documentId);
+		InputStream is = XOPHandler.getDocumentStream();
+		return IOUtils.toByteArray(is);
 	}
 }

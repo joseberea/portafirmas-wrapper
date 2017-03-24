@@ -1,5 +1,7 @@
 package test;
 
+import static org.junit.Assert.*;
+
 import java.io.InputStream;
 
 import javax.xml.rpc.ServiceException;
@@ -18,6 +20,7 @@ import es.meyss.sgtic.sige.portafirmas.client.ws.query.QueryService_ServiceLocat
 import es.meyss.sgtic.sige.portafirmas.type.Authentication;
 import es.meyss.sgtic.sige.portafirmas.type.Signature;
 import es.meyss.sgtic.sige.portafirmaswrapper.exception.WrapperConfigException;
+import es.meyss.sgtic.sige.portafirmaswrapper.type.PFDocumentStatus;
 import es.meyss.sgtic.sige.portafirmaswrapper.type.PFResponse;
 import es.meyss.sgtic.sige.portafirmaswrapper.wrapper.IPortafirmasWrapper;
 import es.meyss.sgtic.sige.portafirmaswrapper.wrapper.impl.PortaFirmasWrapperImpl;
@@ -96,18 +99,24 @@ public class TestClient {
 		portafirmasWrapper.sendRequest();
 	}*/
 	
-	@Test
+	/*@Test
+	public void test6DownloadDocument() throws Exception {
+		PFDocumentStatus status = portafirmasWrapper.getDocumentStatus("twjINby7mB", "kFXlo6pqkI");
+		System.out.println(status.getStatus().getStatusValue());
+	}*/
+	
+	/*@Test
 	public void testNameXX() throws Exception {
 		AxisProperties.setProperty("axis.ClientConfigFile", "src/main/java/es/meyss/sgtic/sige/portafirmaswrapper/client-config.wsdd");
         // Axis client invocation
         QueryServiceSoapBindingStub binding =
             (QueryServiceSoapBindingStub) new QueryService_ServiceLocator().getQueryServicePort();
-        binding.downloadDocument(authentication, "aNTnJctcTq");
-        System.out.println(XOPHandler.getDocumentStream());
-	}
+        binding.downloadDocument(authentication, "twjINby7mB");
+        System.out.println(es.meyss.sgtic.sige.portafirmaswrapper.XOPHandler.getDocumentStream());
+	}*/
 	
 	
-	@Test
+	/*@Test
 	public void testName() throws Exception {
 		System.setProperty("axis.ClientConfigFile", "src/main/java/es/meyss/sgtic/sige/portafirmaswrapper/client-config.wsdd");
 		
@@ -134,6 +143,11 @@ public class TestClient {
 		
 		/*PFDocumentStatus status = null;
 		status = portafirmasWrapper.getDocumentStatus("el2abTv0Ak", "yr9Kn48lPM");
-		assertNotEquals(status, null);*/
+		assertNotEquals(status, null);
+	}*/
+	
+	@Test
+	public void testName() throws Exception {
+		
 	}
 }
