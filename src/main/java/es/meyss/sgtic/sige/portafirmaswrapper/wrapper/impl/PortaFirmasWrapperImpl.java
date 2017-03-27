@@ -1,5 +1,6 @@
 package es.meyss.sgtic.sige.portafirmaswrapper.wrapper.impl;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.rmi.RemoteException;
@@ -68,7 +69,9 @@ public class PortaFirmasWrapperImpl implements IPortafirmasWrapper {
 	private List<Document> documentList = new LinkedList<Document>();
 
 	public PortaFirmasWrapperImpl(Authentication authentication, String application) throws WrapperConfigException, ServiceException {
-		AxisProperties.setProperty("axis.ClientConfigFile", "src/main/java/es/meyss/sgtic/sige/portafirmaswrapper/client-config.wsdd");
+		//AxisProperties.setProperty("axis.ClientConfigFile", "src/main/java/es/meyss/sgtic/sige/portafirmaswrapper/client-config.wsdd");
+		File f = new File("src/main/java/es/meyss/sgtic/sige/portafirmaswrapper/client-config.wsdd");
+		f.exists();
 		if(authentication == null) {
 			throw new WrapperConfigException("authentication");
 		}

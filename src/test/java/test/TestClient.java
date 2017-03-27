@@ -99,11 +99,11 @@ public class TestClient {
 		portafirmasWrapper.sendRequest();
 	}*/
 	
-	/*@Test
+	@Test
 	public void test6DownloadDocument() throws Exception {
 		PFDocumentStatus status = portafirmasWrapper.getDocumentStatus("twjINby7mB", "kFXlo6pqkI");
 		System.out.println(status.getStatus().getStatusValue());
-	}*/
+	}
 	
 	/*@Test
 	public void testNameXX() throws Exception {
