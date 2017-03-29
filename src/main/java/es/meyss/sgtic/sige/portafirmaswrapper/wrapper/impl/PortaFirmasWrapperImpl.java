@@ -1,6 +1,5 @@
 package es.meyss.sgtic.sige.portafirmaswrapper.wrapper.impl;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.rmi.RemoteException;
@@ -15,7 +14,6 @@ import java.util.Map.Entry;
 import javax.xml.rpc.ServiceException;
 import javax.xml.rpc.holders.StringHolder;
 
-import org.apache.axis.AxisProperties;
 import org.apache.commons.io.IOUtils;
 
 import es.meyss.sgtic.sige.portafirmas.client.ws.admin.AdminService_PortType;
@@ -34,11 +32,13 @@ import es.meyss.sgtic.sige.portafirmas.type.SignLine;
 import es.meyss.sgtic.sige.portafirmas.type.SignLineType;
 import es.meyss.sgtic.sige.portafirmas.type.SignType;
 import es.meyss.sgtic.sige.portafirmas.type.Signer;
+import es.meyss.sgtic.sige.portafirmas.type.TimestampInfo;
 import es.meyss.sgtic.sige.portafirmas.type.User;
 import es.meyss.sgtic.sige.portafirmaswrapper.XOPHandler;
 import es.meyss.sgtic.sige.portafirmaswrapper.exception.MandatoryEmptyFieldException;
 import es.meyss.sgtic.sige.portafirmaswrapper.exception.NullRequestException;
 import es.meyss.sgtic.sige.portafirmaswrapper.exception.WrapperConfigException;
+import es.meyss.sgtic.sige.portafirmaswrapper.exception.DuplicatedDataException;
 import es.meyss.sgtic.sige.portafirmaswrapper.type.PFDocument;
 import es.meyss.sgtic.sige.portafirmaswrapper.type.PFDocumentStatus;
 import es.meyss.sgtic.sige.portafirmaswrapper.type.PFImportanceLevel;
@@ -69,9 +69,6 @@ public class PortaFirmasWrapperImpl implements IPortafirmasWrapper {
 	private List<Document> documentList = new LinkedList<Document>();
 
 	public PortaFirmasWrapperImpl(Authentication authentication, String application) throws WrapperConfigException, ServiceException {
-		//AxisProperties.setProperty("axis.ClientConfigFile", "src/main/java/es/meyss/sgtic/sige/portafirmaswrapper/client-config.wsdd");
-		File f = new File("src/main/java/es/meyss/sgtic/sige/portafirmaswrapper/client-config.wsdd");
-		f.exists();
 		if(authentication == null) {
 			throw new WrapperConfigException("authentication");
 		}
@@ -90,6 +87,7 @@ public class PortaFirmasWrapperImpl implements IPortafirmasWrapper {
 
 	@Override
 	public void createRequest() {
+		clearRequest();
 		request = new Request();
 		request.setSubject(" -- No subject -- ");
 		request.setFentry(calendar);
@@ -99,10 +97,12 @@ public class PortaFirmasWrapperImpl implements IPortafirmasWrapper {
 		request.setImportanceLevel(PFImportanceLevel.NORMAL);
 		request.setSignLineList(new SignLine[0]);
 		request.setRemitterList(new User[0]);
+		request.setTimestampInfo(new TimestampInfo(true));
 	}
 
 	@Override
-	public void createRequest(final String subject, final ImportanceLevel importanceLevel, SignType signType) throws MandatoryEmptyFieldException {
+	public void createRequest(final String subject, final ImportanceLevel importanceLevel, SignType signType, boolean longTimeSing) throws MandatoryEmptyFieldException {
+		clearRequest();
 		if(importanceLevel == null) {
 			throw new MandatoryEmptyFieldException("ImportanceLevel");
 		}
@@ -118,6 +118,11 @@ public class PortaFirmasWrapperImpl implements IPortafirmasWrapper {
 		request.setImportanceLevel(importanceLevel);
 		request.setSignLineList(new SignLine[0]);
 		request.setRemitterList(new User[0]);
+		if(longTimeSing) {
+			request.setTimestampInfo(new TimestampInfo(true));	
+		} else {
+			request.setTimestampInfo(new TimestampInfo(false));
+		}
 	}
 	
 	@Override
@@ -151,14 +156,29 @@ public class PortaFirmasWrapperImpl implements IPortafirmasWrapper {
 		PFDocumentStatus status = new PFDocumentStatus();
 		
 		Request request = wsQueryService.queryRequest(authentication, requestId);
+		status.setOriginalContent(downloadDocument(documentId));
 		if(request.getRequestStatus().equals(PFStatusType.ACEPTADO)) {
-			// Documento firmado, actualizamos el valor del content
-			status.setContent(getSign(documentId));
-		} else {
-			status.setContent(getDocument(documentId));
-		}
+			// Documento firmado, actualizamos el valor del firmado y el informe de firma
+			status.setSignedContent(downloadSign(documentId));
+			status.setSignReportContent(downloadSignReport(documentId));
+		} 
 		status.setStatus(new PFStatusType(request.getRequestStatus().getValue()));
 		return status;
+	}
+
+	@Override
+	public byte[] getOriginalDocument(String documentId) throws IOException {
+		return this.downloadDocument(documentId);
+	}
+	
+	@Override
+	public byte[] getSignedDocument(String documentId) throws IOException {
+		return this.downloadSign(documentId);
+	}
+	
+	@Override
+	public byte[] getSignReport(String documentId) throws IOException {
+		return this.downloadSignReport(documentId);
 	}
 	
 	@Override
@@ -223,7 +243,10 @@ public class PortaFirmasWrapperImpl implements IPortafirmasWrapper {
 	}
 
 	@Override
-	public void addSignLine(final Integer signLine) {
+	public void addSignLine(final Integer signLine) throws DuplicatedDataException {
+		if(signLineMap.containsKey(signLine)) {
+			throw new DuplicatedDataException("Signline", signLine.toString());
+		}
 		signLineMap.put(signLine, new SignLine());
 	}
 
@@ -233,7 +256,14 @@ public class PortaFirmasWrapperImpl implements IPortafirmasWrapper {
 	}
 
 	@Override
-	public void addSigner(final Integer signLine, final String signer) {
+	public void addSigner(final Integer signLine, final String signer) throws DuplicatedDataException {
+		for(Entry<Integer, LinkedList<Signer>> entry : signerMap.entrySet()) {
+			for(Signer signerEntry : entry.getValue()) {
+				if(signerEntry.getUserJob().getIdentifier().equals(signer)) {
+					throw new DuplicatedDataException("Signer", signer);
+				}
+			}
+		}
 		Signer defaultSigner = new Signer();
 		User user1 = new User();
 		user1.setIdentifier(signer);
@@ -292,15 +322,21 @@ public class PortaFirmasWrapperImpl implements IPortafirmasWrapper {
 		documentList = new LinkedList<Document>();
 	}
 	
-	public byte[] getDocument(String documentId) throws IOException {
+	public byte[] downloadDocument(String documentId) throws IOException {
 		wsQueryService.downloadDocument(authentication, documentId);
 		InputStream is = XOPHandler.getDocumentStream();
 		return IOUtils.toByteArray(is);
 		
 	}
 	
-	private byte[] getSign(String documentId) throws IOException {
+	private byte[] downloadSign(String documentId) throws IOException {
 		wsQueryService.downloadSign(authentication, documentId);
+		InputStream is = XOPHandler.getDocumentStream();
+		return IOUtils.toByteArray(is);
+	}
+
+	private byte[] downloadSignReport(String documentId) throws IOException {
+		wsQueryService.queryCSVyJustificante(authentication, documentId);
 		InputStream is = XOPHandler.getDocumentStream();
 		return IOUtils.toByteArray(is);
 	}

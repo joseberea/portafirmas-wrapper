@@ -15,6 +15,12 @@
         <parameter name="mtomNodePath" value="downloadSignResponse.signature.content"/>
     </handler>    
     
+    <handler name="xop3" type="java:es.meyss.sgtic.sige.portafirmaswrapper.XOPHandler">
+        <parameter name="serviceName" value="{urn:juntadeandalucia:cice:pfirma:query:v2.0}QueryService"/>
+        <parameter name="operationName" value="queryCSVyJustificante"/>
+        <parameter name="mtomNodePath" value="queryCSVyJustificanteResponse.csvJustificante.content"/>
+    </handler>    
+    
     <globalConfiguration>
        <requestFlow>
            <handler type="log"/>
@@ -23,6 +29,7 @@
             <handler type="log"/>
             <handler type="xop1"/>
             <handler type="xop2"/>
+            <handler type="xop3"/>
        </responseFlow>
     </globalConfiguration>
     
