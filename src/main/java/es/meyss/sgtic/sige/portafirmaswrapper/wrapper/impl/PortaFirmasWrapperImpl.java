@@ -59,7 +59,7 @@ public class PortaFirmasWrapperImpl implements IPortafirmasWrapper {
 	private final AdminService_PortType wsAdminService;
 
 	private final Authentication authentication;
-
+ 
 	private final String application;
 
 	private Request request;
